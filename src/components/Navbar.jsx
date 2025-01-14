@@ -1,3 +1,4 @@
+import { Link } from 'react-router';
 import logo from '../assets/images/logo.png'
 import { useAuth } from '../hooks/useAuth';
 
@@ -15,12 +16,12 @@ const Navbar = () => {
 			<div className="flex-none">
 				<ul className="menu menu-horizontal px-1">
 					<li>
-						<div>Home</div>
+						<Link to="/">Home</Link>
 					</li>
 
 					{!user && (
 						<li>
-							<div>Login</div>
+							<Link to="/login">Login</Link>
 						</li>
 					)}
 				</ul>
