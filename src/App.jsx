@@ -5,10 +5,14 @@ import Login from "./pages/auth-pages/Login";
 import Registration from "./pages/auth-pages/Registration";
 
 export const App = () => {
+
 	return (
 		<Routes>
 			<Route path="/" element={<MainLayout />}>
-				<Route index element={<Home />} />
+				<Route
+					path="/"
+					element={<Home />}
+				/>
 				<Route path="/login" element={<Login />} />
 				<Route path="/registration" element={<Registration />} />
 			</Route>

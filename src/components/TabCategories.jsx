@@ -1,8 +1,36 @@
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import "react-tabs/style/react-tabs.css";
 import { JobCard } from "./JobCard";
+import PropTypes, { object } from "prop-types";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 export const TabCategories = () => {
+	const [jobs, setJobs] = useState([]);
+
+	useEffect(() => {
+		const getData = async () => {
+			const { data } = await axios(`${import.meta.env.VITE_API_URL}/jobs`);
+			setJobs(data);
+		};
+		getData();
+	}, []);
+
+	//! WEB DEVELOPMENT JOBS
+	const developmentJobs = jobs
+		.filter((jobs) => jobs.category === "Web Development")
+		.map((devJob) => <JobCard key={devJob._id} job={devJob} />);
+
+	//! GRAPHICS DESIGN JOBS
+	const designJobs = jobs
+		.filter((jobs) => jobs.category === "Graphic Design")
+		.map((devJob) => <JobCard key={devJob._id} job={devJob} />);
+
+	//! DIGITAL MARKETING JOBS
+	const marketingJobs = jobs
+		.filter((jobs) => jobs.category === "Digital Marketing")
+		.map((devJob) => <JobCard key={devJob._id} job={devJob} />);
+
 	return (
 		<Tabs className="py-10">
 			<h2 className="text-2xl font-semibold text-center text-gray-800 capitalize lg:text-3xl">
@@ -22,16 +50,31 @@ export const TabCategories = () => {
 			</div>
 
 			<div className="py-6">
+				{/* WEB DEVELOPMENT JOBS */}
 				<TabPanel>
-					<JobCard />
+					<div className="grid grid-cols-1 gap-8 mt-8 xl:mt-16 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+						{developmentJobs}
+					</div>
 				</TabPanel>
+
+				{/* GRAPHICS DESIGN JOBS */}
 				<TabPanel>
-					<h2>Any content 2</h2>
+					<div className="grid grid-cols-1 gap-8 mt-8 xl:mt-16 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+						{designJobs}
+					</div>
 				</TabPanel>
+
+				{/* DIGITAL MARKETING JOBS */}
 				<TabPanel>
-					<h2>Any content 3</h2>
+					<div className="grid grid-cols-1 gap-8 mt-8 xl:mt-16 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+						{marketingJobs}
+					</div>
 				</TabPanel>
 			</div>
 		</Tabs>
 	);
+};
+
+TabCategories.propTypes = {
+	jobs: PropTypes.arrayOf(object),
 };
