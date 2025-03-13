@@ -1,8 +1,9 @@
 import PropTypes from "prop-types";
+import { Link } from "react-router";
 
 export const JobCard = ({job}) => {
   return (
-		<div className="w-full max-w-sm px-4 py-3 bg-white rounded-md shadow-md hover:scale-[1.05] transition-all">
+		<Link to={`/job/${job._id}`} className="w-full max-w-sm px-4 py-3 bg-white rounded-md shadow-md hover:scale-[1.05] transition-all">
 			<div className="flex items-center justify-between">
 				<span className="text-xs font-light text-gray-800 ">
 					Deadline: {job.deadline}
@@ -22,7 +23,7 @@ export const JobCard = ({job}) => {
 					Range: ${job.min_price} - ${job.max_price}
 				</p>
 			</div>
-		</div>
+		</Link>
 	);
 }
 
