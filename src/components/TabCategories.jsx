@@ -23,7 +23,7 @@ export const TabCategories = () => {
 
 	//! GRAPHICS DESIGN JOBS
 	const designJobs = jobs
-		.filter((jobs) => jobs.category === "Graphic Design")
+		.filter((jobs) => jobs.category === "Graphics Design")
 		.map((devJob) => <JobCard key={devJob._id} job={devJob} />);
 
 	//! DIGITAL MARKETING JOBS

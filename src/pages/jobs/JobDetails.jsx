@@ -28,8 +28,8 @@ const JobDetails = () => {
 		const price = parseFloat(form.price.value);
 		const comment = form.comment.value;
 		const email = user?.email;
-		const buyer_email = job?.buyer_email;
-		const deadline = startDate;
+		const buyer_email = job?.buyer?.email;
+		const deadline = new Date(startDate).toLocaleDateString();
 		const status = "pending";
 
 		if (price < job?.min_price) {
@@ -101,14 +101,14 @@ const JobDetails = () => {
 					<div className="flex items-center gap-5">
 						<div>
 							<p className="mt-2 text-sm  text-gray-600 capitalize">
-								Name: {job?.buyer_email?.slice(0, 4)}
+								Name: {job?.buyer?.name}
 							</p>
 							<p className="mt-2 text-sm  text-gray-600 ">
-								Email: {job?.buyer_email}
+								Email: {job?.buyer?.email}
 							</p>
 						</div>
 						<div className="rounded-full object-cover overflow-hidden w-14 h-14">
-							<img src="" alt="" />
+							<img src={job?.buyer?.photo} alt="Buyer Photo" />
 						</div>
 					</div>
 					<p className="mt-6 text-lg font-bold text-gray-600 ">
@@ -170,7 +170,6 @@ const JobDetails = () => {
 								selected={startDate}
 								onChange={(date) => setStartDate(date)}
 							/>
-							{/* Date Picker Input Field */}
 						</div>
 					</div>
 
