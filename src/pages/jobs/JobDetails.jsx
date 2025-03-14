@@ -2,9 +2,12 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
+import DatePicker from "react-datepicker";
+import toast from "react-hot-toast";
 
 const JobDetails = () => {
 	const [job, setJob] = useState({});
+	const [startDate, setStartDate] = useState(new Date());
 	const params = useParams();
 	const { user } = useAuth();
 
@@ -17,6 +20,59 @@ const JobDetails = () => {
 		};
 		getData();
 	}, [params.id]);
+
+	async function handleFormSubmission(event) {
+		event.preventDefault();
+		const form = event.target;
+		const jobId = job?._id;
+		const price = parseFloat(form.price.value);
+		const comment = form.comment.value;
+		const email = user?.email;
+		const buyer_email = job?.buyer_email;
+		const deadline = startDate;
+		const status = "pending";
+
+		if (price < job?.min_price) {
+			return toast.error("You have to BID at least equal to minimum price");
+		} else if (form.price.value.length < 1) {
+			return toast.error("You have to enter the BID PRICE");
+		}
+
+		if (email === buyer_email) {
+			return toast.error("You can't apply to this job");
+		}
+
+		const bidData = {
+			jobId,
+			price,
+			comment,
+			deadline,
+			email,
+			buyer_email,
+			status,
+			category: job?.category,
+		};
+
+		try {
+			const { data } = await axios.post(
+				`${import.meta.env.VITE_API_URL}/bids`,
+				bidData
+			);
+			if (data.insertedId) {
+				return toast.success("Bids Place Successfully");
+			} else {
+				return toast.error("Something Went Wrong, Please try again later");
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				toast.error(error.message);
+			} else {
+				toast.error(error);
+			}
+		} finally {
+			form.reset();
+		}
+	}
 
 	return (
 		<div className="flex flex-col md:flex-row justify-around gap-5  items-center min-h-[calc(100vh-306px)] md:max-w-screen-xl mx-auto my-12">
@@ -44,11 +100,11 @@ const JobDetails = () => {
 					</p>
 					<div className="flex items-center gap-5">
 						<div>
-							<p className="mt-2 text-sm  text-gray-600 ">
-								Name: {user?.displayName}
+							<p className="mt-2 text-sm  text-gray-600 capitalize">
+								Name: {job?.buyer_email?.slice(0, 4)}
 							</p>
 							<p className="mt-2 text-sm  text-gray-600 ">
-								Email: {user?.email}
+								Email: {job?.buyer_email}
 							</p>
 						</div>
 						<div className="rounded-full object-cover overflow-hidden w-14 h-14">
@@ -66,11 +122,11 @@ const JobDetails = () => {
 					Place A Bid
 				</h2>
 
-				<form>
+				<form onSubmit={handleFormSubmission}>
 					<div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
 						<div>
 							<label className="text-gray-700 " htmlFor="price">
-								Price
+								Price<span className="font-bold text-red-600">*</span>
 							</label>
 							<input
 								id="price"
@@ -106,8 +162,14 @@ const JobDetails = () => {
 							/>
 						</div>
 						<div className="flex flex-col gap-2 ">
-							<label className="text-gray-700">Deadline</label>
-
+							<label className="text-gray-700">
+								Deadline<span className="font-bold text-red-600">*</span>
+							</label>
+							<DatePicker
+								className="border p-2 rounded-md w-full"
+								selected={startDate}
+								onChange={(date) => setStartDate(date)}
+							/>
 							{/* Date Picker Input Field */}
 						</div>
 					</div>
