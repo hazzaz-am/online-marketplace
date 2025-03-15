@@ -9,6 +9,7 @@ import ErrorPage from "./pages/ErrorPage";
 import MyPostedJobs from "./pages/jobs/MyPostedJobs";
 import MyBids from "./pages/jobs/MyBids";
 import BidRequests from "./pages/jobs/BidRequests";
+import UpdateJob from "./pages/jobs/UpdateJobs";
 
 export const App = () => {
 	return (
@@ -22,6 +23,7 @@ export const App = () => {
 				<Route path="/my-posted-jobs" element={<MyPostedJobs />} />
 				<Route path="/my-bids" element={<MyBids />} />
 				<Route path="/bid-requests" element={<BidRequests />} />
+				<Route path="/update-job/:id" element={<UpdateJob />} />
 				<Route path="*" element={<ErrorPage />} />
 			</Route>
 		</Routes>

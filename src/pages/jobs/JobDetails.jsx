@@ -80,7 +80,7 @@ const JobDetails = () => {
 			<div className="flex-1  px-4 py-7 bg-white rounded-md shadow-md md:min-h-[350px]">
 				<div className="flex items-center justify-between">
 					<span className="text-sm font-light text-gray-800 ">
-						Deadline: {job?.deadline}
+						Deadline: {new Date(job?.deadline).toLocaleDateString()}
 					</span>
 					<span className="px-4 py-1 text-xs text-blue-800 uppercase bg-blue-200 rounded-full ">
 						{job?.category}
