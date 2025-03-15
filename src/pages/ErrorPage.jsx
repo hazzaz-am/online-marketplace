@@ -1,8 +1,6 @@
-import { Link, useNavigation } from "react-router";
+import { Link } from "react-router";
 
 const ErrorPage = () => {
-  const navigate = useNavigation()
-  console.log(navigate)
 
 	return (
 		<section className="bg-white ">

@@ -6,6 +6,9 @@ import Registration from "./pages/auth-pages/Registration";
 import JobDetails from "./pages/jobs/JobDetails";
 import AddJob from "./pages/jobs/AddJob";
 import ErrorPage from "./pages/ErrorPage";
+import MyPostedJobs from "./pages/jobs/MyPostedJobs";
+import MyBids from "./pages/jobs/MyBids";
+import BidRequests from "./pages/jobs/BidRequests";
 
 export const App = () => {
 	return (
@@ -16,6 +19,9 @@ export const App = () => {
 				<Route path="/registration" element={<Registration />} />
 				<Route path="/job/:id" element={<JobDetails />} />
 				<Route path="/add-job" element={<AddJob />} />
+				<Route path="/my-posted-jobs" element={<MyPostedJobs />} />
+				<Route path="/my-bids" element={<MyBids />} />
+				<Route path="/bid-requests" element={<BidRequests />} />
 				<Route path="*" element={<ErrorPage />} />
 			</Route>
 		</Routes>
