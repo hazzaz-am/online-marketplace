@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
 import DatePicker from "react-datepicker";
 import toast from "react-hot-toast";
@@ -10,6 +10,7 @@ const JobDetails = () => {
 	const [startDate, setStartDate] = useState(new Date());
 	const params = useParams();
 	const { user } = useAuth();
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const getData = async () => {
@@ -25,10 +26,11 @@ const JobDetails = () => {
 		event.preventDefault();
 		const form = event.target;
 		const jobId = job?._id;
+		const job_title = job?.job_title;
 		const price = parseFloat(form.price.value);
 		const comment = form.comment.value;
 		const email = user?.email;
-		const buyer_email = job?.buyer?.email;
+		const buyer = job?.buyer;
 		const deadline = new Date(startDate).toLocaleDateString();
 		const status = "pending";
 
@@ -38,17 +40,18 @@ const JobDetails = () => {
 			return toast.error("You have to enter the BID PRICE");
 		}
 
-		if (email === buyer_email) {
+		if (email === buyer?.email) {
 			return toast.error("You can't apply to this job");
 		}
 
 		const bidData = {
 			jobId,
+			job_title,
 			price,
 			comment,
 			deadline,
 			email,
-			buyer_email,
+			buyer,
 			status,
 			category: job?.category,
 		};
@@ -59,7 +62,8 @@ const JobDetails = () => {
 				bidData
 			);
 			if (data.insertedId) {
-				return toast.success("Bids Place Successfully");
+				toast.success("Bids Place Successfully");
+				navigate(`/my-bids`);
 			} else {
 				return toast.error("Something Went Wrong, Please try again later");
 			}

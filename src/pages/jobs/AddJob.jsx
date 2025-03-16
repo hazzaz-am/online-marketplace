@@ -3,10 +3,12 @@ import { useAuth } from "../../hooks/useAuth";
 import DatePicker from "react-datepicker";
 import toast from "react-hot-toast";
 import axios from "axios";
+import { useNavigate } from "react-router";
 
 const AddJob = () => {
 	const [startDate, setStartDate] = useState(new Date());
 	const { user } = useAuth();
+	const navigate = useNavigate();
 
 	async function handleFormSubmission(event) {
 		event.preventDefault();
@@ -49,7 +51,8 @@ const AddJob = () => {
 				jobData
 			);
 			if (data.insertedId) {
-				return toast.success("Job added Successfully");
+				toast.success("Job added Successfully");
+				navigate("/my-posted-jobs");
 			} else {
 				return toast.error("Something Went Wrong, Please try again later");
 			}

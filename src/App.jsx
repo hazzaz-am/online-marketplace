@@ -10,20 +10,66 @@ import MyPostedJobs from "./pages/jobs/MyPostedJobs";
 import MyBids from "./pages/jobs/MyBids";
 import BidRequests from "./pages/jobs/BidRequests";
 import UpdateJob from "./pages/jobs/UpdateJobs";
+import { ProtectedRoute } from "./routes/ProtectedRoute";
 
 export const App = () => {
+
 	return (
 		<Routes>
 			<Route path="/" element={<MainLayout />}>
 				<Route path="/" element={<Home />} />
 				<Route path="/login" element={<Login />} />
 				<Route path="/registration" element={<Registration />} />
-				<Route path="/job/:id" element={<JobDetails />} />
-				<Route path="/add-job" element={<AddJob />} />
-				<Route path="/my-posted-jobs" element={<MyPostedJobs />} />
-				<Route path="/my-bids" element={<MyBids />} />
-				<Route path="/bid-requests" element={<BidRequests />} />
-				<Route path="/update-job/:id" element={<UpdateJob />} />
+
+				<Route
+					path="/job/:id"
+					element={
+						<ProtectedRoute>
+							<JobDetails />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/add-job"
+					element={
+						<ProtectedRoute>
+							<AddJob />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/my-posted-jobs"
+					element={
+						<ProtectedRoute>
+							<MyPostedJobs />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/my-bids"
+					element={
+						<ProtectedRoute>
+							<MyBids />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/bid-requests"
+					element={
+						<ProtectedRoute>
+							<BidRequests />
+						</ProtectedRoute>
+					}
+				/>
+				<Route
+					path="/update-job/:id"
+					element={
+						<ProtectedRoute>
+							<UpdateJob />
+						</ProtectedRoute>
+					}
+				/>
+
 				<Route path="*" element={<ErrorPage />} />
 			</Route>
 		</Routes>

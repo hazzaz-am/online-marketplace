@@ -12,7 +12,7 @@ const MyPostedJobs = () => {
 	async function getData() {
 		try {
 			const { data } = await axios.get(
-				`${import.meta.env.VITE_API_URL}/personal-jobs/${user?.email}`
+				`${import.meta.env.VITE_API_URL}/my-jobs/${user?.email}`
 			);
 			setJobs(data);
 		} catch (error) {

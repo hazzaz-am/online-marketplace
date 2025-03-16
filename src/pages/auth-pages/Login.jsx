@@ -1,41 +1,43 @@
-import { Link, useNavigate } from "react-router";
-import loginBG from '../../assets/images/login.jpg'
-import logo from '../../assets/images/logo.png'
+import { Link, useLocation, useNavigate } from "react-router";
+import loginBG from "../../assets/images/login.jpg";
+import logo from "../../assets/images/logo.png";
 import toast from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth";
 
 const Login = () => {
-		const { signIn, signInWithGoogle } = useAuth();
-		const navigate = useNavigate();
+	const { signIn, signInWithGoogle } = useAuth();
+	const navigate = useNavigate();
+	const location = useLocation();
+	const from = location.state || "/";
 
-		// google sign in
-		const handleGoogleSignIn = async () => {
-			try {
-				await signInWithGoogle();
-				toast.success("Sign in Successfully");
-				navigate("/");
-			} catch (error) {
-				console.log(error);
-				toast.error(error?.message);
-			}
-		};
+	// google sign in
+	const handleGoogleSignIn = async () => {
+		try {
+			await signInWithGoogle();
+			toast.success("Sign in Successfully");
+			navigate(from, { replace: true });
+		} catch (error) {
+			console.log(error);
+			toast.error(error?.message);
+		}
+	};
 
-		// email password sign in
-		const handleEmailPasswordSignIn = async (event) => {
-			event.preventDefault();
-			const form = event.target;
-			const email = form.email.value;
-			const password = form.password.value;
-			try {
-				const result = await signIn(email, password);
-				console.log(result);
-				toast.success("Sign in Successfully");
-				navigate("/");
-			} catch (error) {
-				console.log(error);
-				toast.error(error?.message);
-			}
-		};
+	// email password sign in
+	const handleEmailPasswordSignIn = async (event) => {
+		event.preventDefault();
+		const form = event.target;
+		const email = form.email.value;
+		const password = form.password.value;
+		try {
+			const result = await signIn(email, password);
+			console.log(result);
+			toast.success("Sign in Successfully");
+			navigate(from, { replace: true });
+		} catch (error) {
+			console.log(error);
+			toast.error(error?.message);
+		}
+	};
 
 	return (
 		<div className="flex justify-center items-center min-h-[calc(100vh-306px)] my-12">

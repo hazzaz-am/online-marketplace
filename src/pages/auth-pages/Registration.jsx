@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import registrationBG from "../../assets/images/register.jpg";
 import logo from "../../assets/images/logo.png";
 import { useAuth } from "../../hooks/useAuth";
@@ -8,13 +8,15 @@ const Registration = () => {
 	const { user, setUser, createUser, signInWithGoogle, updateUserProfile } =
 		useAuth();
 	const navigate = useNavigate();
+	const location = useLocation();
+	const from = location.state || "/";
 
 	// google sign in
 	const handleGoogleSignIn = async () => {
 		try {
 			await signInWithGoogle();
 			toast.success("Sign in Successfully");
-			navigate("/");
+			navigate(from, { replace: true });
 		} catch (error) {
 			console.log(error);
 			toast.error(error?.message);
@@ -35,7 +37,7 @@ const Registration = () => {
 			await updateUserProfile(name, photo);
 			setUser({ ...user, photoURL: photo, displayName: name });
 			toast.success("Sign up Successfully");
-			navigate("/");
+			navigate(from, { replace: true });
 		} catch (error) {
 			console.log(error);
 			toast.error(error?.message);
