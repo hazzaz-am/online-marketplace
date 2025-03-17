@@ -29,7 +29,7 @@ const JobDetails = () => {
 		const job_title = job?.job_title;
 		const price = parseFloat(form.price.value);
 		const comment = form.comment.value;
-		const email = user?.email;
+		const email = user.email;
 		const buyer = job?.buyer;
 		const deadline = new Date(startDate).toLocaleDateString();
 		const status = "pending";

@@ -3,6 +3,7 @@ import loginBG from "../../assets/images/login.jpg";
 import logo from "../../assets/images/logo.png";
 import toast from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth";
+import axios from "axios";
 
 const Login = () => {
 	const { signIn, signInWithGoogle } = useAuth();
@@ -13,9 +14,19 @@ const Login = () => {
 	// google sign in
 	const handleGoogleSignIn = async () => {
 		try {
-			await signInWithGoogle();
-			toast.success("Sign in Successfully");
-			navigate(from, { replace: true });
+			const result = await signInWithGoogle();
+			const { data } = await axios.post(
+				`${import.meta.env.VITE_API_URL}/jwt`,
+				{ email: result?.user.email },
+				{ withCredentials: true }
+			);
+
+			if (data.success) {
+				toast.success("Sign in Successfully");
+				navigate(from, { replace: true });
+			} else {
+				return toast.error("Failed to sign in with Google");
+			}
 		} catch (error) {
 			console.log(error);
 			toast.error(error?.message);
@@ -30,8 +41,17 @@ const Login = () => {
 		const password = form.password.value;
 		try {
 			const result = await signIn(email, password);
-			console.log(result);
-			toast.success("Sign in Successfully");
+			const { data } = await axios.post(
+				`${import.meta.env.VITE_API_URL}/jwt`,
+				{ email: result?.user.email },
+				{ withCredentials: true }
+			);
+			if (data.success) {
+				toast.success("Sign in Successfully");
+				navigate(from, { replace: true });
+			} else {
+				 toast.error("Didn't find credentials");
+			}
 			navigate(from, { replace: true });
 		} catch (error) {
 			console.log(error);
