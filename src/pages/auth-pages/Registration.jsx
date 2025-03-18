@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 
 const Registration = () => {
-	const { user, setUser, createUser, signInWithGoogle, updateUserProfile } =
+	const { setUser, createUser, signInWithGoogle, updateUserProfile } =
 		useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -28,7 +28,6 @@ const Registration = () => {
 				return toast.error("Failed to sign in with Google");
 			}
 		} catch (error) {
-			console.log(error);
 			toast.error(error?.message);
 		}
 	};
@@ -54,9 +53,8 @@ const Registration = () => {
 			} else {
 				toast.error("Didn't find credentials");
 			}
-			console.log(result);
 			await updateUserProfile(name, photo);
-			setUser({ ...user, photoURL: photo, displayName: name });
+			setUser({ ...result.user, photoURL: photo, displayName: name });
 
 			navigate(from, { replace: true });
 		} catch (error) {

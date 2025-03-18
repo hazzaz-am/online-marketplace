@@ -20,7 +20,7 @@ const JobDetails = () => {
 			setJob(data);
 		};
 		getData();
-	}, [params.id]);
+	}, [params.id, user]);
 
 	async function handleFormSubmission(event) {
 		event.preventDefault();
@@ -149,7 +149,7 @@ const JobDetails = () => {
 								type="email"
 								name="email"
 								disabled
-								defaultValue={user?.email}
+								defaultValue={user.email}
 								className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md   focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40  focus:outline-none focus:ring"
 							/>
 						</div>

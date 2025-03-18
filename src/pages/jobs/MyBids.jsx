@@ -10,7 +10,8 @@ const MyBids = () => {
 	async function getData() {
 		try {
 			const { data } = await axios.get(
-				`${import.meta.env.VITE_API_URL}/my-bids/${user?.email}`
+				`${import.meta.env.VITE_API_URL}/my-bids/${user?.email}`,
+				{withCredentials : true}
 			);
 			setBids(data);
 		} catch (error) {

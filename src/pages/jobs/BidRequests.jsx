@@ -1,18 +1,18 @@
-import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import axios from "axios";
 import toast from "react-hot-toast";
+import { useAxiosSecure } from "../../hooks/useAxiosSecure";
+import { useQuery } from "@tanstack/react-query";
+import Skeleton from "../../components/ui/Skeleton";
 
 const BidRequests = () => {
-	const [bidRequests, setBidRequests] = useState([]);
+	// const [bidRequests, setBidRequests] = useState([]);
 	const { user } = useAuth();
+	const axiosSecure = useAxiosSecure();
 
 	async function getData() {
 		try {
-			const { data } = await axios.get(
-				`${import.meta.env.VITE_API_URL}/bid-requests/${user?.email}`
-			);
-			setBidRequests(data);
+			const { data } = await axiosSecure.get(`/bid-requests/${user?.email}`);
+			return data;
 		} catch (error) {
 			if (error instanceof Error) {
 				toast.error(error.message);
@@ -28,10 +28,7 @@ const BidRequests = () => {
 			return;
 		}
 		try {
-			const { data } = await axios.patch(
-				`${import.meta.env.VITE_API_URL}/bids/${id}`,
-				{ status }
-			);
+			const { data } = await axiosSecure.patch(`/bids/${id}`, { status });
 			if (data.modifiedCount === 1) {
 				toast.success("Status updated successfully");
 				getData();
@@ -47,9 +44,14 @@ const BidRequests = () => {
 		}
 	}
 
-	useEffect(() => {
-		getData();
-	}, [user]);
+	const { data, isLoading, isError, error } = useQuery({
+		queryKey: ["bids"],
+		queryFn: () => getData(),
+	});
+
+	if (isLoading) return <Skeleton />;
+
+	if (isError || error) return <div>{error.message}</div>;
 
 	return (
 		<section className="container px-4 mx-auto pt-12">
@@ -57,8 +59,7 @@ const BidRequests = () => {
 				<h2 className="text-lg font-medium text-gray-800 ">Bid Requests</h2>
 
 				<span className="px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full ">
-					{bidRequests?.length}{" "}
-					{bidRequests?.length > 1 ? "Bid Requests" : "Bid Request"}
+					{data?.length} {data?.length > 1 ? "Bid Requests" : "Bid Request"}
 				</span>
 			</div>
 
@@ -122,7 +123,7 @@ const BidRequests = () => {
 									</tr>
 								</thead>
 								<tbody className="bg-white divide-y divide-gray-200 ">
-									{bidRequests?.map((bid) => (
+									{data?.map((bid) => (
 										<tr key={bid?._id}>
 											<td className="px-4 py-4 text-sm text-gray-500  whitespace-nowrap">
 												{bid?.job_title}

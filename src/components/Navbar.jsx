@@ -37,7 +37,7 @@ const Navbar = () => {
 								<img
 									referrerPolicy="no-referrer"
 									alt="User Profile Photo"
-									src={user?.photoURL}
+									src={user?.photoURL || "https://placehold.co/400"}
 								/>
 							</div>
 						</div>
