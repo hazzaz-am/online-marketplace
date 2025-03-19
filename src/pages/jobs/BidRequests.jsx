@@ -1,13 +1,14 @@
 import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
 import { useAxiosSecure } from "../../hooks/useAxiosSecure";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Skeleton from "../../components/ui/Skeleton";
 
 const BidRequests = () => {
 	// const [bidRequests, setBidRequests] = useState([]);
 	const { user } = useAuth();
 	const axiosSecure = useAxiosSecure();
+	const queryClient = useQueryClient();
 
 	async function getData() {
 		try {
@@ -27,31 +28,37 @@ const BidRequests = () => {
 			toast.error("Status is already updated");
 			return;
 		}
-		try {
-			const { data } = await axiosSecure.patch(`/bids/${id}`, { status });
-			if (data.modifiedCount === 1) {
-				toast.success("Status updated successfully");
-				getData();
-			} else {
-				return toast.error("Something went wrong");
-			}
-		} catch (error) {
-			if (error instanceof Error) {
-				toast.error(error.message);
-			} else {
-				toast.error(error);
-			}
-		}
+
+		await mutateAsync({ id, status });
 	}
 
 	const { data, isLoading, isError, error } = useQuery({
-		queryKey: ["bids"],
+		queryKey: ["bids", user?.email],
 		queryFn: () => getData(),
+	});
+
+	const { mutateAsync } = useMutation({
+		mutationFn: async ({ id, status }) => {
+			const { data } = await axiosSecure.patch(`/bids/${id}`, { status });
+			return data;
+		},
+		onSuccess: () => {
+			toast.success("Status updated successfully");
+			queryClient.invalidateQueries({ queryKey: ["bids"] });
+		},
+		onError: () => {
+			toast.error("Something went wrong");
+		},
 	});
 
 	if (isLoading) return <Skeleton />;
 
-	if (isError || error) return <div>{error.message}</div>;
+	if (isError || error)
+		return (
+			<div>
+				{error.message} {console.log(error)}
+			</div>
+		);
 
 	return (
 		<section className="container px-4 mx-auto pt-12">

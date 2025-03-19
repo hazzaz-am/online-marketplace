@@ -1,19 +1,18 @@
-import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import axios from "axios";
 import toast from "react-hot-toast";
+import { useAxiosSecure } from "../../hooks/useAxiosSecure";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Skeleton from "../../components/ui/Skeleton";
 
 const MyBids = () => {
-	const [bids, setBids] = useState([]);
 	const { user } = useAuth();
+	const axiosSecure = useAxiosSecure();
+	const queryClient = useQueryClient();
 
 	async function getData() {
 		try {
-			const { data } = await axios.get(
-				`${import.meta.env.VITE_API_URL}/my-bids/${user?.email}`,
-				{withCredentials : true}
-			);
-			setBids(data);
+			const { data } = await axiosSecure.get(`/my-bids/${user?.email}`);
+			return data;
 		} catch (error) {
 			if (error instanceof Error) {
 				toast.error(error.message);
@@ -24,18 +23,8 @@ const MyBids = () => {
 	}
 
 	async function handleUpdateStatus(id, status) {
-
 		try {
-			const { data } = await axios.patch(
-				`${import.meta.env.VITE_API_URL}/bids/${id}`,
-				{ status }
-			);
-			if (data.modifiedCount === 1) {
-				toast.success("Status updated successfully");
-				getData();
-			} else {
-				return toast.error("Something went wrong");
-			}
+			await mutateAsync({ id, status });
 		} catch (error) {
 			if (error instanceof Error) {
 				toast.error(error.message);
@@ -45,9 +34,30 @@ const MyBids = () => {
 		}
 	}
 
-	useEffect(() => {
-		getData();
-	}, [user]);
+	const { data, isLoading, isError, error } = useQuery({
+		queryKey: ["bids", user?.email],
+		queryFn: () => getData(),
+	});
+
+	const { mutateAsync } = useMutation({
+		mutationFn: async ({ id, status }) => {
+			const { data } = await axiosSecure.patch(`/bids/${id}`, { status });
+			return data;
+		},
+		onSuccess: () => {
+			toast.success("Status updated successfully");
+			queryClient.invalidateQueries(["bids", user?.email]);
+		},
+		onError: () => {
+			toast.error("Something went wrong");
+		},
+	});
+
+	if (isLoading) return <Skeleton />;
+
+	if (isError) {
+		<div className="text-center mt-10 text-red-500">{error.message}</div>;
+	}
 
 	return (
 		<section className="container px-4 mx-auto pt-12">
@@ -55,7 +65,7 @@ const MyBids = () => {
 				<h2 className="text-lg font-medium text-gray-800 ">My Bids</h2>
 
 				<span className="px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full ">
-					{bids?.length} {bids?.length > 1 ? "Bids" : "Bid"}
+					{data?.length} {data?.length > 1 ? "Bids" : "Bid"}
 				</span>
 			</div>
 
@@ -111,7 +121,7 @@ const MyBids = () => {
 									</tr>
 								</thead>
 								<tbody className="bg-white divide-y divide-gray-200 ">
-									{bids?.map((bid) => (
+									{data?.map((bid) => (
 										<tr key={bid?._id}>
 											<td className="px-4 py-4 text-sm text-gray-500  whitespace-nowrap">
 												{bid?.job_title}
@@ -176,10 +186,7 @@ const MyBids = () => {
 											<td className="px-4 py-4 text-sm whitespace-nowrap">
 												<button
 													onClick={() =>
-														handleUpdateStatus(
-															bid?._id,
-															"completed"
-														)
+														handleUpdateStatus(bid?._id, "completed")
 													}
 													disabled={bid?.status !== "in progress"}
 													title="Mark completed"

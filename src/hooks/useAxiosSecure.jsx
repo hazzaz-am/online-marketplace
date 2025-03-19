@@ -8,16 +8,16 @@ const axiosSecure = axios.create({
 });
 
 export const useAxiosSecure = () => {
-	const { logout } = useAuth();
+	const { logOut } = useAuth();
 	const navigate = useNavigate();
 	axiosSecure.interceptors.response.use(
 		(res) => {
 			return res;
 		},
 		async (error) => {
-			const errorResponse = error.response.status;
+			const errorResponse = error?.response?.status;
 			if (errorResponse === 401 || errorResponse === 403) {
-				await logout();
+				await logOut();
 				navigate("/login");
 			}
 			return Promise.reject(error);

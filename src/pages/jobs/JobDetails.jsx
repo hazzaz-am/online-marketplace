@@ -1,40 +1,43 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
 import DatePicker from "react-datepicker";
 import toast from "react-hot-toast";
+import { useAxiosSecure } from "../../hooks/useAxiosSecure";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const JobDetails = () => {
-	const [job, setJob] = useState({});
 	const [startDate, setStartDate] = useState(new Date());
 	const params = useParams();
 	const { user } = useAuth();
 	const navigate = useNavigate();
+	const axiosSecure = useAxiosSecure();
+	const queryClient = useQueryClient();
 
-	useEffect(() => {
-		const getData = async () => {
-			const { data } = await axios(
-				`${import.meta.env.VITE_API_URL}/jobs/${params.id}`
-			);
-			setJob(data);
-		};
-		getData();
-	}, [params.id, user]);
+	const getData = async () => {
+		const { data } = await axiosSecure.get(`/jobs/${params.id}`);
+		return data;
+	};
+
+	const { data } = useQuery({
+		queryKey: ["job", user],
+		queryFn: () => getData(),
+	});
+
 
 	async function handleFormSubmission(event) {
 		event.preventDefault();
 		const form = event.target;
-		const jobId = job?._id;
-		const job_title = job?.job_title;
+		const jobId = data?._id;
+		const job_title = data?.job_title;
 		const price = parseFloat(form.price.value);
 		const comment = form.comment.value;
 		const email = user.email;
-		const buyer = job?.buyer;
+		const buyer = data?.buyer;
 		const deadline = new Date(startDate).toLocaleDateString();
 		const status = "pending";
 
-		if (price < job?.min_price) {
+		if (price < data?.min_price) {
 			return toast.error("You have to BID at least equal to minimum price");
 		} else if (form.price.value.length < 1) {
 			return toast.error("You have to enter the BID PRICE");
@@ -53,20 +56,11 @@ const JobDetails = () => {
 			email,
 			buyer,
 			status,
-			category: job?.category,
+			category: data?.category,
 		};
 
 		try {
-			const { data } = await axios.post(
-				`${import.meta.env.VITE_API_URL}/bids`,
-				bidData
-			);
-			if (data.insertedId) {
-				toast.success("Bids Place Successfully");
-				navigate(`/my-bids`);
-			} else {
-				return toast.error("Something Went Wrong, Please try again later");
-			}
+			await mutateAsync({ bidData });
 		} catch (error) {
 			if (error instanceof Error) {
 				toast.error(error.message);
@@ -78,26 +72,41 @@ const JobDetails = () => {
 		}
 	}
 
+	const { mutateAsync } = useMutation({
+		mutationFn: async ({ bidData }) => {
+			const { data } = await axiosSecure.post(`/bids`, bidData);
+			return data;
+		},
+		onSuccess: () => {
+			toast.success("Bids Place Successfully");
+			queryClient.invalidateQueries({ queryKey: ["bids"] });
+			navigate(`/my-bids`);
+		},
+		onError: () => {
+			toast.error("Something Went Wrong, Please try again later");
+		},
+	});
+
 	return (
 		<div className="flex flex-col md:flex-row justify-around gap-5  items-center min-h-[calc(100vh-306px)] md:max-w-screen-xl mx-auto my-12">
 			{/* Job Details */}
 			<div className="flex-1  px-4 py-7 bg-white rounded-md shadow-md md:min-h-[350px]">
 				<div className="flex items-center justify-between">
 					<span className="text-sm font-light text-gray-800 ">
-						Deadline: {new Date(job?.deadline).toLocaleDateString()}
+						Deadline: {new Date(data?.deadline).toLocaleDateString()}
 					</span>
 					<span className="px-4 py-1 text-xs text-blue-800 uppercase bg-blue-200 rounded-full ">
-						{job?.category}
+						{data?.category}
 					</span>
 				</div>
 
 				<div>
 					<h1 className="mt-2 text-3xl font-semibold text-gray-800 ">
-						{job?.job_title}
+						{data?.job_title}
 					</h1>
 
 					<p className="mt-2 text-lg text-gray-600 ">
-						{job?.description?.slice(0, 70)}
+						{data?.description?.slice(0, 70)}
 					</p>
 					<p className="mt-6 text-sm font-bold text-gray-600 ">
 						Buyer Details:
@@ -105,18 +114,18 @@ const JobDetails = () => {
 					<div className="flex items-center gap-5">
 						<div>
 							<p className="mt-2 text-sm  text-gray-600 capitalize">
-								Name: {job?.buyer?.name}
+								Name: {data?.buyer?.name}
 							</p>
 							<p className="mt-2 text-sm  text-gray-600 ">
-								Email: {job?.buyer?.email}
+								Email: {data?.buyer?.email}
 							</p>
 						</div>
 						<div className="rounded-full object-cover overflow-hidden w-14 h-14">
-							<img src={job?.buyer?.photo} alt="Buyer Photo" />
+							<img src={data?.buyer.photo} alt="Buyer Photo" />
 						</div>
 					</div>
 					<p className="mt-6 text-lg font-bold text-gray-600 ">
-						Range: ${job?.min_price} - ${job?.max_price}
+						Range: ${data?.min_price} - ${data?.max_price}
 					</p>
 				</div>
 			</div>

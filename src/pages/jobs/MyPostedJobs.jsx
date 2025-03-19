@@ -1,19 +1,19 @@
-import { useEffect } from "react";
-import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
 import { Link } from "react-router";
 import { useAxiosSecure } from "../../hooks/useAxiosSecure";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Skeleton from "../../components/ui/Skeleton";
 
 const MyPostedJobs = () => {
-	const [jobs, setJobs] = useState([]);
 	const { user } = useAuth();
+	const queryClient = useQueryClient();
 	const axiosSecure = useAxiosSecure();
 
 	async function getData() {
 		try {
 			const { data } = await axiosSecure(`/my-jobs/${user?.email}`);
-			setJobs(data);
+			return data;
 		} catch (error) {
 			if (error instanceof Error) {
 				toast.error(error.message);
@@ -23,26 +23,35 @@ const MyPostedJobs = () => {
 		}
 	}
 
-	useEffect(() => {
-		getData();
-	}, [user]);
-
 	async function handleDelete(id) {
-		try {
-			const { data } = await axiosSecure(`/jobs/${id}`);
-			if (data.deletedCount) {
-				getData();
-				toast.success("Job Deleted Successfully");
-			} else {
-				toast.error("Something Went Wrong");
-			}
-		} catch (error) {
-			if (error instanceof Error) {
-				toast.error(error.message);
-			} else {
-				toast.error(error);
-			}
-		}
+		await mutateAsync({ id });
+	}
+
+	const { data, isLoading, isError, error } = useQuery({
+		queryKey: ["my-posted-jobs", user?.email],
+		queryFn: () => getData(),
+	});
+
+	const { mutateAsync } = useMutation({
+		mutationFn: async ({ id }) => {
+			const { data } = await axiosSecure.delete(`/jobs/${id}`);
+			return data;
+		},
+		onSuccess: () => {
+			toast.success("Job Deleted Successfully");
+			queryClient.invalidateQueries(["my-posted-jobs", "bids"]);
+		},
+		onError: () => {
+			toast.error("Something Went Wrong");
+		},
+	});
+
+	if (isLoading) {
+		return <Skeleton />;
+	}
+
+	if (isError) {
+		<div className="text-center mt-10">{error.message}</div>;
 	}
 
 	return (
@@ -51,7 +60,7 @@ const MyPostedJobs = () => {
 				<h2 className="text-lg font-medium text-gray-800 ">My Posted Jobs</h2>
 
 				<span className="px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full ">
-					{jobs.length} {jobs.length === 1 ? "Job" : "Jobs"}
+					{data?.length} {data?.length === 1 ? "Job" : "Jobs"}
 				</span>
 			</div>
 
@@ -106,7 +115,7 @@ const MyPostedJobs = () => {
 									</tr>
 								</thead>
 								<tbody className="bg-white divide-y divide-gray-200 ">
-									{jobs.map((job) => (
+									{data?.map((job) => (
 										<tr key={job._id}>
 											<td className="px-4 py-4 text-sm text-gray-500  whitespace-nowrap">
 												{job?.job_title}

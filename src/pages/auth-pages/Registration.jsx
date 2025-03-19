@@ -3,24 +3,25 @@ import registrationBG from "../../assets/images/register.jpg";
 import logo from "../../assets/images/logo.png";
 import { useAuth } from "../../hooks/useAuth";
 import toast from "react-hot-toast";
-import axios from "axios";
+import { useAxiosSecure } from "../../hooks/useAxiosSecure";
 
 const Registration = () => {
 	const { setUser, createUser, signInWithGoogle, updateUserProfile } =
 		useAuth();
 	const navigate = useNavigate();
 	const location = useLocation();
+
+	const axiosSecure = useAxiosSecure();
+
 	const from = location.state || "/";
 
 	// google sign in
 	const handleGoogleSignIn = async () => {
 		try {
 			const result = await signInWithGoogle();
-			const { data } = await axios.post(
-				`${import.meta.env.VITE_API_URL}/jwt`,
-				{ email: result?.user.email },
-				{ withCredentials: true }
-			);
+			const { data } = await axiosSecure.post(`/jwt`, {
+				email: result?.user.email,
+			});
 			if (data.success) {
 				toast.success("Sign in Successfully");
 				navigate(from, { replace: true });
@@ -42,11 +43,9 @@ const Registration = () => {
 		const pass = form.password.value;
 		try {
 			const result = await createUser(email, pass);
-			const { data } = await axios.post(
-				`${import.meta.env.VITE_API_URL}/jwt`,
-				{ email: result?.user.email },
-				{ withCredentials: true }
-			);
+			const { data } = await axiosSecure.post(`/jwt`, {
+				email: result?.user.email,
+			});
 
 			if (data.success) {
 				toast.success("Sign up Successfully");

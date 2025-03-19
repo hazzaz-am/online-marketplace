@@ -2,13 +2,15 @@ import { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import DatePicker from "react-datepicker";
 import toast from "react-hot-toast";
-import axios from "axios";
 import { useNavigate } from "react-router";
+import { useAxiosSecure } from "../../hooks/useAxiosSecure";
+import { useMutation } from "@tanstack/react-query";
 
 const AddJob = () => {
 	const [startDate, setStartDate] = useState(new Date());
 	const { user } = useAuth();
 	const navigate = useNavigate();
+	const axiosSecure = useAxiosSecure();
 
 	async function handleFormSubmission(event) {
 		event.preventDefault();
@@ -45,27 +47,23 @@ const AddJob = () => {
 			},
 		};
 
-		try {
-			const { data } = await axios.post(
-				`${import.meta.env.VITE_API_URL}/jobs`,
-				jobData
-			);
-			if (data.insertedId) {
-				toast.success("Job added Successfully");
-				navigate("/my-posted-jobs");
-			} else {
-				return toast.error("Something Went Wrong, Please try again later");
-			}
-		} catch (error) {
-			if (error instanceof Error) {
-				toast.error(error.message);
-			} else {
-				toast.error(error);
-			}
-		} finally {
-			form.reset();
-		}
+		await mutateAsync({ jobData });
+		form.reset();
 	}
+
+	const { mutateAsync } = useMutation({
+		mutationFn: async ({ jobData }) => {
+			const { data } = await axiosSecure.post(`/jobs`, jobData);
+			return data;
+		},
+		onSuccess: () => {
+			toast.success("Job added Successfully");
+			navigate("/my-posted-jobs");
+		},
+		onError: () => {
+			toast.error("Something Went Wrong, Please try again later");
+		},
+	});
 
 	return (
 		<div className="flex justify-center items-center min-h-[calc(100vh-306px)] my-12">
