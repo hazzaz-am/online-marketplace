@@ -11,15 +11,16 @@ import MyBids from "./pages/jobs/MyBids";
 import BidRequests from "./pages/jobs/BidRequests";
 import UpdateJob from "./pages/jobs/UpdateJobs";
 import { ProtectedRoute } from "./routes/ProtectedRoute";
+import AllJobs from "./pages/jobs/AllJobs";
 
 export const App = () => {
-
 	return (
 		<Routes>
 			<Route path="/" element={<MainLayout />}>
 				<Route path="/" element={<Home />} />
 				<Route path="/login" element={<Login />} />
 				<Route path="/registration" element={<Registration />} />
+				<Route path="/all-jobs" element={<AllJobs />} />
 
 				<Route
 					path="/job/:id"

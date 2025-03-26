@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import { Link } from "react-router";
 
-export const JobCard = ({job}) => {
-  return (
+export const JobCard = ({ job }) => {
+	return (
 		<Link
 			to={`/job/${job._id}`}
 			className="w-full max-w-sm px-4 py-3 bg-white rounded-md shadow-md hover:scale-[1.05] transition-all"
@@ -11,7 +11,18 @@ export const JobCard = ({job}) => {
 				<span className="text-xs font-light text-gray-800 ">
 					Deadline: {new Date(job.deadline).toLocaleDateString()}
 				</span>
-				<span className="px-3 py-1 text-[8px] text-blue-800 uppercase bg-blue-200 rounded-full ">
+				<span
+					className={`px-3 py-1 text-[8px] uppercase rounded-full ${
+						job.category === "Web Development" &&
+						"text-blue-500 bg-blue-100/60"
+					} ${
+						job.category === "Graphics Design" &&
+						"text-emerald-500 bg-emerald-100/60"
+					} ${
+						job.category === "Digital Marketing" &&
+						"text-pink-500 bg-pink-100/60"
+					}`}
+				>
 					{job.category}
 				</span>
 			</div>
@@ -30,8 +41,8 @@ export const JobCard = ({job}) => {
 			</div>
 		</Link>
 	);
-}
+};
 
 JobCard.propTypes = {
-	job: PropTypes.object
-}
+	job: PropTypes.object,
+};
