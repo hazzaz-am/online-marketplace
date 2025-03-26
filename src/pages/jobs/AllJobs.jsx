@@ -67,6 +67,7 @@ const AllJobs = () => {
 		e.preventDefault();
 		const value = e.target.search.value;
 		setSearchTitle(value);
+		setCurrentPage(1)
 	}
 
 	if (isLoading || isCountLoading) return <Skeleton />;
