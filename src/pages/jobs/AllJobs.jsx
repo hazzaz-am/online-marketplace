@@ -9,29 +9,38 @@ const ITEMS_PER_PAGE = 8;
 const AllJobs = () => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [filterCategory, setFilterCategory] = useState("");
+	const [sortOrder, setSortOrder] = useState("");
+	const [searchTitle, setSearchTitle] = useState("");
 	const axiosSecure = useAxiosSecure();
 
-	const getData = async (page, filter) => {
-		console.log(filter);
+	const getData = async (page, filter, sortOrder, searchTitle) => {
 		const { data } = await axiosSecure.get(
-			`/filtered-jobs?page=${page}&size=${ITEMS_PER_PAGE}&filter=${filter}`
+			`/filtered-jobs?page=${page}&size=${ITEMS_PER_PAGE}&filter=${filter}&sort=${sortOrder}&search=${searchTitle}`
 		);
 		return data;
 	};
 
-	async function getTotalJobs() {
-		const { data } = await axiosSecure.get("/total-jobs");
+	async function getTotalJobs(filter, searchTitle) {
+		const { data } = await axiosSecure.get(
+			`/total-jobs?filter=${filter}&search=${searchTitle}`
+		);
 		return data;
 	}
 
 	const { data, isLoading, isError, error } = useQuery({
-		queryKey: ["filtered-jobs", currentPage, filterCategory],
-		queryFn: () => getData(currentPage, filterCategory),
+		queryKey: [
+			"filtered-jobs",
+			currentPage,
+			filterCategory,
+			sortOrder,
+			searchTitle,
+		],
+		queryFn: () => getData(currentPage, filterCategory, sortOrder, searchTitle),
 	});
 
 	const { data: count, isLoading: isCountLoading } = useQuery({
-		queryKey: ["total-jobs"],
-		queryFn: () => getTotalJobs(),
+		queryKey: ["total-jobs", filterCategory, searchTitle],
+		queryFn: () => getTotalJobs(filterCategory, searchTitle),
 	});
 
 	const pages = count
@@ -48,6 +57,17 @@ const AllJobs = () => {
 		}
 	}
 
+	function resetAllFilters() {
+		setFilterCategory("");
+		setSortOrder("")
+	}
+
+	function handleSearchTitle(e) {
+		e.preventDefault();
+		const value = e.target.search.value;
+		setSearchTitle(value);
+	}
+
 	if (isLoading || isCountLoading) return <Skeleton />;
 
 	if (isError) return <p>Error: {error.message}</p>;
@@ -60,7 +80,10 @@ const AllJobs = () => {
 						<select
 							name="category"
 							id="category"
-							onChange={(event) => setFilterCategory(event.target.value)}
+							onChange={(event) => {
+								setFilterCategory(event.target.value);
+								setCurrentPage(1);
+							}}
 							value={filterCategory}
 							className="border p-4 rounded-lg"
 						>
@@ -71,7 +94,7 @@ const AllJobs = () => {
 						</select>
 					</div>
 
-					<form>
+					<form onSubmit={handleSearchTitle}>
 						<div className="flex p-1 overflow-hidden border rounded-lg    focus-within:ring focus-within:ring-opacity-40 focus-within:border-blue-400 focus-within:ring-blue-300">
 							<input
 								className="px-6 py-2 text-gray-700 placeholder-gray-500 bg-white outline-none focus:placeholder-transparent"
@@ -88,8 +111,13 @@ const AllJobs = () => {
 					</form>
 					<div>
 						<select
-							name="category"
-							id="category"
+							name="sort"
+							id="sort"
+							onChange={(event) => {
+								setSortOrder(event.target.value);
+								setCurrentPage(1);
+							}}
+							value={sortOrder}
 							className="border p-4 rounded-md"
 						>
 							<option value="">Sort By Deadline</option>
@@ -97,7 +125,9 @@ const AllJobs = () => {
 							<option value="asc">Ascending Order</option>
 						</select>
 					</div>
-					<button className="btn">Reset</button>
+					<button onClick={resetAllFilters} className="btn">
+						Reset
+					</button>
 				</div>
 				<div className="grid grid-cols-1 gap-8 mt-8 xl:mt-16 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 					{data?.map((job) => (
