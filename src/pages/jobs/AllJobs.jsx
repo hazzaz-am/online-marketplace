@@ -60,6 +60,7 @@ const AllJobs = () => {
 	function resetAllFilters() {
 		setFilterCategory("");
 		setSortOrder("")
+		setSearchTitle("")
 	}
 
 	function handleSearchTitle(e) {
